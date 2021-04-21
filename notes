@@ -1,0 +1,4 @@
+no dir ~/codex 
+snap-auth-cli -s -f submissions.db -c -u nome -p passwd 
+-m modify 
+-d delete 
