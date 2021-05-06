@@ -1,1 +1,1 @@
-# project-regexp
+# eqrex
