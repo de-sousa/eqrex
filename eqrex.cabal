@@ -1,0 +1,40 @@
+cabal-version:      2.4
+name:               eqrex
+version:            0.1.0.0
+
+-- A short (one-line) description of the package.
+-- synopsis:
+
+-- A longer description of the package.
+-- description:
+
+-- A URL where users can report bugs.
+-- bug-reports:
+license:            MIT
+license-file:       LICENSE
+author:             Paulo Sousa
+maintainer:         de.sousa.paulus@gmail.com
+
+-- A copyright notice.
+-- copyright:
+-- category:
+extra-source-files: CHANGELOG.md
+
+common common-all
+    build-depends:
+        base ^>=4.14.1.0,
+        parsec,
+        HaLeX,
+        containers
+    default-language: Haskell2010
+
+library
+    import:           common-all
+    exposed-modules:  ParseRegExp
+    hs-source-dirs:   src
+
+executable eqrex
+    import:           common-all
+    main-is:          Main.hs
+    other-modules:    ParseRegExp
+    hs-source-dirs:   app, src
