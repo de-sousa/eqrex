@@ -2,8 +2,8 @@
 
 module ParseRegExp where
 
-import Language.HaLex.RegExp as LHRE
-import Text.Parsec
+import Language.HaLex.RegExp (RegExp (..))
+import Text.Parsec (Parsec (..), parse, (<|>), char, many, chainl1, many1, satisfy, eof)
 import qualified Text.Parsec.Token as P
 import Text.Parsec.Language (haskellDef)
 

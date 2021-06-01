@@ -30,11 +30,11 @@ common common-all
 
 library lib
     import:           common-all
-    exposed-modules:  ParseRegExp
+    exposed-modules:  ParseRegExp DFAOperations DFAExtensions DFAWordSearch
     hs-source-dirs:   src
 
 executable eqrex
     import:           common-all
     main-is:          Main.hs
-    other-modules:    ParseRegExp
+    other-modules:    ParseRegExp DFAOperations DFAExtensions DFAWordSearch
     hs-source-dirs:   app, src
