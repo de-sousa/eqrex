@@ -23,8 +23,8 @@ regExpFeedback n exp1 exp2
   | dfa1 == dfa2 = Accept
   | otherwise    =
       Negate
-      (take n (unionWordSearch $ dfaDifference dfa1 dfa2))
-      (take n (unionWordSearch $ dfaDifference dfa2 dfa1))
+      (take n (wordSearch $ dfaDifference dfa1 dfa2))
+      (take n (wordSearch $ dfaDifference dfa2 dfa1))
     where
       dfa1 = regExp2Dfa exp1
       dfa2 = regExp2Dfa exp2
