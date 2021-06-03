@@ -16,6 +16,7 @@ instance Show a => Show (LOL a) where
 data Tree t = Leaf | Branch t [Tree t]
     deriving Foldable
 
+unfoldTree :: (a -> Bool) -> (a -> b) -> (a -> [a]) -> a -> Tree b
 unfoldTree c d t e = if (c e) then Leaf
                               else Branch (d e) (map (unfoldTree c d t) (t e))
 
