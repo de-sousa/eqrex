@@ -95,4 +95,4 @@ main = do
                     putStrLn ""
                 prettyPrint xs = case xs of
                     [] -> sequence [putStrLn "    None"]
-                    _  -> sequence $ map (putStrLn . (\x -> "    " ++ show x)) xs 
+                    _  -> sequence $ map (putStrLn . (\x -> "    - " ++ x)) xs 

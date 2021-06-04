@@ -10,10 +10,10 @@ import Text.Parsec.Language (haskellDef)
 type Parser a = Parsec String () a
 
 specialChars :: String
-specialChars = "\\^$.|?*+()[]{}"
+specialChars        = ['\\','^','|','?','*','+','(',')','[',']']
 
 normalChars :: String
-normalChars = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ~#%&_`-=:\";<>,/"
+normalChars = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ~#%&_`-=:\";<>,/{}$."
 
 oneCharOf :: String -> Parser Char
 oneCharOf str = satisfy (\x -> elem x str)
@@ -49,7 +49,7 @@ term = do
    x <- factor
    termop x <|> return x
 
-factor = lexeme (normal <|> special <|> ranges <|> parens expr)
+factor = lexeme (character <|> ranges <|> parens expr)
 
 orop = lexeme $ 
    do
@@ -67,15 +67,10 @@ termop x = lexeme $
       char '*'
       return (Star x)
 
-normal = do
-   x <- oneCharOf normalChars
-   return (Literal x)
+character = do
+    x <- lexeme $ oneChar
+    return (Literal x)
 
-special = do
-   char '\\'
-   x <- oneCharOf specialChars
-   return (Literal x)
-      
 ranges = do
    char '['
    x <- posRanges <|> negRange
@@ -88,18 +83,26 @@ posRanges = do
 
 posRange = 
    do
-      x <- lexeme $ oneCharOf normalChars
+      x <- lexeme $ oneChar
       (do
          lexeme (char '-')
-         y <- lexeme $ oneCharOf normalChars
+         y <- lexeme $ oneChar
          return [x..y]
        <|> do
          return [x])
 
 negRange = do
    lexeme (char '^')
-   x <- lexeme $ oneCharOf normalChars
+   x <- lexeme $ oneChar
    lexeme (char '-')
-   y <- lexeme $ oneCharOf normalChars
-   return [tmp | tmp <- normalChars, not $ elem tmp [x..y]]
+   y <- lexeme $ oneChar
+   return [tmp | tmp <- (normalChars ++ specialChars), not $ elem tmp [x..y]]
+
+oneChar = do
+            lexeme $ char '\\'
+            x <- lexeme $ oneCharOf specialChars
+            return x
+          <|> do
+            x <- lexeme $ oneCharOf normalChars
+            return x
 
