@@ -14,7 +14,9 @@ instance Show a => Show (LOL a) where
    show (LOL a) = show a
 
 data Tree t = Leaf | Branch t [Tree t]
-    deriving Foldable
+
+instance Foldable Tree where
+    foldMap f = foldMap f . bf
 
 unfoldTree :: (a -> Bool) -> (a -> b) -> (a -> [a]) -> a -> Tree b
 unfoldTree c d t e = if (c e) then Leaf
@@ -29,11 +31,22 @@ xs@(x:xt) \/ ys@(y:yt) = case compare x y of
    EQ -> x : xt\/yt
    GT -> y : xs\/yt
 
+levels :: Tree a -> [[a]]
+levels Leaf = []
+levels (Branch x xs) = [x] : foldr (lzw (++)) [] (map levels xs)
+
+lzw f []     ys     = ys
+lzw f xs     []     = xs
+lzw f (x:xs) (y:ys) = f x y : lzw f xs ys
+
+bf = concat . levels
+
 wordSearch :: (Eq sy, Eq st, Ord sy, Ord st) => Dfa st sy -> [[sy]]
 wordSearch = map (\(LOL s) -> s) . hyloWordSearch
 
 hyloWordSearch :: (Eq sy, Eq st, Ord sy, Ord st) => Dfa st sy -> [LOL sy]
-hyloWordSearch fulldfa = foldr (\/) [] 
+hyloWordSearch fulldfa = concat 
+                         $ foldr (:) []
                          $ unfoldTree (\(_      , st) -> elem st trash)
                                       (\(LOL str, st) -> if elem st fin then [LOL str] else [])
                                       (\(LOL str, st) -> [(LOL (str ++ [ch]), trans st ch) | ch <- voc])
