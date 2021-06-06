@@ -1,10 +1,10 @@
 {-# LANGUAGE DeriveFoldable #-}
+{-# LANGUAGE FlexibleContexts #-}
 
 module DFAWordSearch where
 
 import Language.HaLex.Dfa (Dfa (..))
 import Language.HaLex.Minimize (minimizeDfa)
-
 
 data LOL a = LOL [a]
    deriving Eq
@@ -15,8 +15,12 @@ instance Show a => Show (LOL a) where
 
 data Tree t = Leaf | Branch t [Tree t]
 
-instance Foldable Tree where
-    foldMap f = foldMap f . bf
+foldTree :: (b -> a -> a) -> (a -> a -> a) -> a -> Tree b -> a
+foldTree g h c (Branch x xs) = g x (foldForest g h c xs)
+foldTree g h c Leaf          = c
+
+foldForest :: (b -> a -> a) -> (a -> a -> a) -> a -> [Tree b] -> a
+foldForest g h c xs          = foldr h c (map (foldTree g h c) xs)
 
 unfoldTree :: (a -> Bool) -> (a -> b) -> (a -> [a]) -> a -> Tree b
 unfoldTree c d t e = if (c e) then Leaf
@@ -31,24 +35,15 @@ xs@(x:xt) \/ ys@(y:yt) = case compare x y of
    EQ -> x : xt\/yt
    GT -> y : xs\/yt
 
-levels :: Tree a -> [[a]]
-levels Leaf = []
-levels (Branch x xs) = [x] : foldr (lzw (++)) [] (map levels xs)
-
-lzw f []     ys     = ys
-lzw f xs     []     = xs
-lzw f (x:xs) (y:ys) = f x y : lzw f xs ys
-
-bf = concat . levels
-
 wordSearch :: (Eq sy, Eq st, Ord sy, Ord st) => Dfa st sy -> [[sy]]
 wordSearch = map (\(LOL s) -> s) . hyloWordSearch
 
 hyloWordSearch :: (Eq sy, Eq st, Ord sy, Ord st) => Dfa st sy -> [LOL sy]
-hyloWordSearch fulldfa = concat 
-                         $ foldr (:) []
+hyloWordSearch fulldfa = map fst
+                         $ filter snd
+                         $ foldTree (:) (\/) []
                          $ unfoldTree (\(_      , st) -> elem st trash)
-                                      (\(LOL str, st) -> if elem st fin then [LOL str] else [])
+                                      (\(LOL str, st) -> (LOL str, elem st fin))
                                       (\(LOL str, st) -> [(LOL (str ++ [ch]), trans st ch) | ch <- voc])
                          (LOL [], init)
     where
